@@ -84,16 +84,20 @@ class block_grade_me extends block_base {
             $context = context_course::instance($courseid);
             foreach (explode(',', $CFG->gradebookroles) as $roleid) {
                 $roleid = trim($roleid);
-                if ((groups_get_course_groupmode($course) == SEPARATEGROUPS) &&
-                    !has_capability('moodle/site:accessallgroups', $context)) {
+                if ((groups_get_course_groupmode($course) == SEPARATEGROUPS)
+//                    &&!has_capability('moodle/site:accessallgroups', $context)
+                    &&!has_capability('moodle/site:config', $context)
+                ) {
                     $groups = groups_get_user_groups($courseid, $USER->id);
                     foreach ($groups[0] as $groupid) {
                         $gradebookusers = array_merge($gradebookusers,
-                            array_keys(get_role_users($roleid, $context, false, 'u.id', 'u.id ASC', null, $groupid)));
+                            array_keys(get_role_users($roleid, $context, false, 'u.id', 'u.id ASC', null, $groupid,
+                                '', '', 'u.auth<>"nologin"')));
                     }
                 } else {
                     $gradebookusers = array_merge($gradebookusers,
-                        array_keys(get_role_users($roleid, $context, false, 'u.id', 'u.id ASC')));
+                        array_keys(get_role_users($roleid, $context, false, 'u.id', 'u.id ASC',
+                         true, '', '',  '',  'u.auth<>"nologin"')));
                 }
             }
 
